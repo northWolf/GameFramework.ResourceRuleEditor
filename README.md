@@ -8,7 +8,7 @@ This is a Unity assetbundle rule editor visual tool based on GameFramework. 这�
 1.  假设你本地已有 GameFramework 或者 StarForce 项目。
 2.  Clone本仓库,拷贝Assets/GameMain/Scripts/Editor/AssetBundleRuleEditor 文件夹到项目Editor文件夹中,等待编译完成。
 3.  打开菜单 GameFramework/AssetBundle Tools/AssetBundle Rule Editor,出现如图所示的窗口。
-	![](imgs/Editor.png)
+	![](https://github.com/northWolf/GameFramework.AssetBundleRuleEditor/blob/master/imgs/Editor.png)
 4.  点击 Add 或 + ,添加一条规则记录, 指定一个文件夹,并分配 过滤类型(FilterType) 和 通配符(Patterns) ,支持可选参数: 资源组列表(Groups),
 AB变体(Varient),打进包内(Packed)。
 5.  使用Editor Dirty技术,会自动保存编辑器数据。也可以点击 Save 按钮手动保存。编辑完成后,点击 Refresh AssetBundleCollection.xml 按钮刷新。这个过程可以自动化,
