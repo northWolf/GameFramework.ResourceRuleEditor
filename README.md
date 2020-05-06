@@ -1,37 +1,22 @@
 # GameFramework.AssetBundleRuleEditor
 
 #### 介绍
-This is a Unity assetbundle rule editor visual tool based on GameFramework. 这是一个基于GameFramework框架的AB规则编辑器。
-
-#### 软件架构
-软件架构说明
-
-
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
+This is a Unity assetbundle rule editor visual tool based on GameFramework. 这是一个基于GameFramework框架的AB规则编辑器,支持按自定义规则自动生成AssetBundleCollection.xml,
+省却手动配置的麻烦。
 #### 使用说明
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
-
-
-#### 码云特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5.  码云官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+1.  假设你本地已有 GameFramework 或者 StarForce 项目。
+2.  Clone本仓库,拷贝Assets/GameMain/Scripts/Editor/AssetBundleRuleEditor 文件夹到项目Editor文件夹中,等待编译完成。
+3.  打开菜单 GameFramework/AssetBundle Tools/AssetBundle Rule Editor,出现如图所示的窗口。
+![](imgs\Editor.png)
+4.  点击 Add 或 + ,添加一条规则记录, 指定一个文件夹,并分配 过滤类型(FilterType) 和 通配符(Patterns) ,支持可选参数: 资源组列表(Groups),
+AB变体(Varient),打进包内(Packed)。
+5.  过滤类型(FilterType)说明: 
+		Root 是指定文件夹打成一个AB。
+		Children 指定文件夹下的文件分别打成一个AB。
+		Children Folders Only 指定文件夹下的子文件夹分别打成一个AB。
+		Children Files Only 指定文件夹下的子文件夹的文件分别打成一个AB。
+6.  Groups,Pattens 多个参数值可以用 "," , ";" , "|" 来分割。
+7.  AB名称(AssetBundleName)可缺省。
+		当过滤类型选择为 Root 或 Children Folders Only, AB名称会自动命名为文件夹的名称。
+		当过滤类型选择为 Children 或 Children Files Only,AB名称会自动命名为文件的名称。
