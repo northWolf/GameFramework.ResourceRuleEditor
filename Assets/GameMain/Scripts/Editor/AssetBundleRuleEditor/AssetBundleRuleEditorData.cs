@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityGameFramework.Editor.AssetBundleTools;
 
 namespace StarForce.Editor.AssetBundleTools
@@ -20,7 +21,7 @@ namespace StarForce.Editor.AssetBundleTools
         public AssetBundleLoadType assetBundleLoadType = AssetBundleLoadType.LoadFromFile;
         public bool packed = true;
         public AssetBundleFilterType filterType = AssetBundleFilterType.Root;
-        public string filter = "*.*";
+        public string searchPatterns = "*.*";
     }
 
     public enum AssetBundleFilterType

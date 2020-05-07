@@ -55,15 +55,7 @@ namespace StarForce.Editor.AssetBundleTools
 
                 if (GUILayout.Button("Refresh AssetBundleCollection.xml", EditorStyles.toolbarButton))
                 {
-                    AnalysisAssetBundleFilters();
-                    if (SaveCollection())
-                    {
-                        Debug.Log("Refresh AssetBundleCollection.xml success");
-                    }
-                    else
-                    {
-                        Debug.Log("Refresh AssetBundleCollection.xml fail");
-                    }
+                    RefreshAssetBundleCollection();
                 }
             }
             GUILayout.EndHorizontal();
@@ -185,7 +177,7 @@ namespace StarForce.Editor.AssetBundleTools
 
             r.xMin = r.xMax + GAP;
             r.xMax = rect.xMax;
-            filter.filter = EditorGUI.TextField(r, filter.filter);
+            filter.searchPatterns = EditorGUI.TextField(r, filter.searchPatterns);
         }
 
         private string SelectFolder()
@@ -271,6 +263,23 @@ namespace StarForce.Editor.AssetBundleTools
         }
 
         #region Refresh AssetBundleCollection.xml
+        
+        public void RefreshAssetBundleCollection()
+        {
+            if (m_Configuration == null)
+            {
+                Load();
+            }
+            AnalysisAssetBundleFilters();
+            if (SaveCollection())
+            {
+                Debug.Log("Refresh AssetBundleCollection.xml success");
+            }
+            else
+            {
+                Debug.Log("Refresh AssetBundleCollection.xml fail");
+            }
+        }
 
         private GFAssetBundle[] GetAssetBundles()
         {
@@ -305,7 +314,7 @@ namespace StarForce.Editor.AssetBundleTools
 
             return false;
         }
-
+        
         private void AnalysisAssetBundleFilters()
         {
             m_AssetBundleCollection = new AssetBundleCollection();
@@ -340,7 +349,7 @@ namespace StarForce.Editor.AssetBundleTools
 
                         case AssetBundleFilterType.Children:
                         {
-                            string[] patterns = assetBundleFilter.filter.Split(';', ',', '|');
+                            string[] patterns = assetBundleFilter.searchPatterns.Split(';', ',', '|');
                             for (int i = 0; i < patterns.Length; i++)
                             {
                                 FileInfo[] assetFiles =
@@ -388,7 +397,7 @@ namespace StarForce.Editor.AssetBundleTools
                                 new DirectoryInfo(assetBundleFilter.assetsDirectoryPath).GetDirectories();
                             foreach (DirectoryInfo directory in assetDirectories)
                             {
-                                string[] patterns = assetBundleFilter.filter.Split(';', ',', '|');
+                                string[] patterns = assetBundleFilter.searchPatterns.Split(';', ',', '|');
                                 for (int i = 0; i < patterns.Length; i++)
                                 {
                                     FileInfo[] assetFiles =
@@ -448,7 +457,7 @@ namespace StarForce.Editor.AssetBundleTools
                 {
                     case AssetBundleFilterType.Root:
                     case AssetBundleFilterType.ChildrenFoldersOnly:
-                        string[] patterns = assetBundleFilter.filter.Split(';', ',', '|');
+                        string[] patterns = assetBundleFilter.searchPatterns.Split(';', ',', '|');
                         if (childDirectoryPath == "")
                         {
                             childDirectoryPath = assetBundleFilter.assetsDirectoryPath;
@@ -490,7 +499,6 @@ namespace StarForce.Editor.AssetBundleTools
         {
             return m_AssetBundleCollection.Save();
         }
-
         #endregion
     }
 }
