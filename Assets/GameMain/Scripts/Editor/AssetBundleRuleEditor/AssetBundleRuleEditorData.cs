@@ -7,11 +7,11 @@ namespace StarForce.Editor.AssetBundleTools
 {
     public class AssetBundleRuleEditorData : ScriptableObject
     {
-        public List<AssetBundleFilter> filters = new List<AssetBundleFilter>();
+        public List<AssetBundleRule> rules = new List<AssetBundleRule>();
     }
 
     [System.Serializable]
-    public class AssetBundleFilter
+    public class AssetBundleRule
     {
         public bool valid = true;
         public string assetBundleName = string.Empty;
