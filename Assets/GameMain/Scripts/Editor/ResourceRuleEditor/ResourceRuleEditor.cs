@@ -5,19 +5,19 @@ using GameFramework;
 using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
-using UnityGameFramework.Editor.AssetBundleTools;
-using GFAssetBundle = UnityGameFramework.Editor.AssetBundleTools.AssetBundle;
+using UnityGameFramework.Editor.ResourceTools;
+using GFResource = UnityGameFramework.Editor.ResourceTools.Resource;
 
-namespace StarForce.Editor.AssetBundleTools
+namespace StarForce.Editor.ResourceTools
 {
     /// <summary>
-    /// AssetBundle 规则编辑器，支持按规则配置自动生成 AssetBundleCollection.xml
+    /// Resource 规则编辑器，支持按规则配置自动生成 ResourceCollection.xml
     /// </summary>
-    public class AssetBundleRuleEditor : EditorWindow
+    public class ResourceRuleEditor : EditorWindow
     {
-        private readonly string m_ConfigurationPath = "Assets/GameMain/Configs/AssetBundleRuleEditor.asset";
-        private AssetBundleRuleEditorData m_Configuration;
-        private AssetBundleCollection m_AssetBundleCollection;
+        private readonly string m_ConfigurationPath = "Assets/GameMain/Configs/ResourceRuleEditor.asset";
+        private ResourceRuleEditorData m_Configuration;
+        private ResourceCollection m_ResourceCollection;
         
         private ReorderableList m_RuleList;
         private Vector2 m_ScrollPosition = Vector2.zero;
@@ -25,14 +25,14 @@ namespace StarForce.Editor.AssetBundleTools
         private string m_SourceAssetExceptTypeFilter = "t:Script";
         private string[] m_SourceAssetExceptTypeFilterGUIDArray;
         
-        private string m_SourceAssetExceptLabelFilter = "l:AssetBundleExclusive";
+        private string m_SourceAssetExceptLabelFilter = "l:ResourceExclusive";
         private string[] m_SourceAssetExceptLabelFilterGUIDArray;
         
-        [MenuItem("Game Framework/AssetBundle Tools/AssetBundle Rule Editor", false, 50)]
+        [MenuItem("Game Framework/Resource Tools/Resource Rule Editor", false, 50)]
         static void Open()
         {
-            AssetBundleRuleEditor window = GetWindow<AssetBundleRuleEditor>(true, "AssetBundle Rule Editor", true);
-            window.minSize = new Vector2(1470f, 420f);
+            ResourceRuleEditor window = GetWindow<ResourceRuleEditor>(true, "Resource Rule Editor", true);
+            window.minSize = new Vector2(1555f, 420f);
         }
 
         private void OnGUI()
@@ -59,9 +59,9 @@ namespace StarForce.Editor.AssetBundleTools
                     Save();
                 }
 
-                if (GUILayout.Button("Refresh AssetBundleCollection.xml", EditorStyles.toolbarButton))
+                if (GUILayout.Button("Refresh ResourceCollection.xml", EditorStyles.toolbarButton))
                 {
-                    RefreshAssetBundleCollection();
+                    RefreshResourceCollection();
                 }
             }
             GUILayout.EndHorizontal();
@@ -92,10 +92,10 @@ namespace StarForce.Editor.AssetBundleTools
 
         private void Load()
         {
-            m_Configuration = LoadAssetAtPath<AssetBundleRuleEditorData>(m_ConfigurationPath);
+            m_Configuration = LoadAssetAtPath<ResourceRuleEditorData>(m_ConfigurationPath);
             if (m_Configuration == null)
             {
-                m_Configuration = ScriptableObject.CreateInstance<AssetBundleRuleEditorData>();
+                m_Configuration = ScriptableObject.CreateInstance<ResourceRuleEditorData>();
             }
         }
 
@@ -110,7 +110,7 @@ namespace StarForce.Editor.AssetBundleTools
 
         private void InitRuleListDrawer()
         {
-            m_RuleList = new ReorderableList(m_Configuration.rules, typeof(AssetBundleRule));
+            m_RuleList = new ReorderableList(m_Configuration.rules, typeof(ResourceRule));
             m_RuleList.drawElementCallback = OnListElementGUI;
             m_RuleList.drawHeaderCallback = OnListHeaderGUI;
             m_RuleList.draggable = true;
@@ -123,7 +123,7 @@ namespace StarForce.Editor.AssetBundleTools
             string path = SelectFolder();
             if (!string.IsNullOrEmpty(path))
             {
-                var rule = new AssetBundleRule();
+                var rule = new ResourceRule();
                 rule.assetsDirectoryPath = path;
                 m_Configuration.rules.Add(rule);
             }
@@ -133,7 +133,7 @@ namespace StarForce.Editor.AssetBundleTools
         {
             const float GAP = 5;
 
-            AssetBundleRule rule = m_Configuration.rules[index];
+            ResourceRule rule = m_Configuration.rules[index];
             rect.y++;
 
             Rect r = rect;
@@ -144,23 +144,27 @@ namespace StarForce.Editor.AssetBundleTools
             r.xMin = r.xMax + GAP;
             r.xMax = r.xMax + 425;
             float assetBundleNameLength = r.width;
-            rule.assetBundleName = EditorGUI.TextField(r, rule.assetBundleName);
+            rule.name = EditorGUI.TextField(r, rule.name);
 
             r.xMin = r.xMax + GAP;
             r.xMax = r.xMin + 100;
-            rule.assetBundleLoadType = (AssetBundleLoadType) EditorGUI.EnumPopup(r, rule.assetBundleLoadType);
+            rule.loadType = (LoadType) EditorGUI.EnumPopup(r, rule.loadType);
 
             r.xMin = r.xMax + GAP + 15;
             r.xMax = r.xMin + 30;
             rule.packed = EditorGUI.Toggle(r, rule.packed);
+            
+            r.xMin = r.xMax + GAP;
+            r.xMax = r.xMin + 85;
+            rule.fileSystem = EditorGUI.TextField(r, rule.fileSystem);
 
             r.xMin = r.xMax + GAP;
             r.xMax = r.xMin + 85;
-            rule.assetBundleGroups = EditorGUI.TextField(r, rule.assetBundleGroups);
+            rule.groups = EditorGUI.TextField(r, rule.groups);
 
             r.xMin = r.xMax + GAP;
             r.xMax = r.xMin + 85;
-            rule.assetBundleVariant = EditorGUI.TextField(r, rule.assetBundleVariant);
+            rule.variant = EditorGUI.TextField(r, rule.variant.ToLower());
 
             r.xMin = r.xMax + GAP;
             r.width = assetBundleNameLength - 15;
@@ -179,7 +183,7 @@ namespace StarForce.Editor.AssetBundleTools
 
             r.xMin = r.xMax + GAP;
             r.xMax = r.xMin + 85;
-            rule.filterType = (AssetBundleFilterType) EditorGUI.EnumPopup(r, rule.filterType);
+            rule.filterType = (ResourceFilterType) EditorGUI.EnumPopup(r, rule.filterType);
 
             r.xMin = r.xMax + GAP;
             r.xMax = rect.xMax;
@@ -224,7 +228,7 @@ namespace StarForce.Editor.AssetBundleTools
             r.xMin = r.xMax + GAP;
             r.xMax = r.xMax + 415;
             float assetBundleNameLength = r.width;
-            EditorGUI.TextField(r, "AssetBundleName");
+            EditorGUI.TextField(r, "Name");
 
             r.xMin = r.xMax + GAP;
             r.xMax = r.xMin + 100;
@@ -233,6 +237,10 @@ namespace StarForce.Editor.AssetBundleTools
             r.xMin = r.xMax + GAP;
             r.xMax = r.xMin + 50;
             EditorGUI.TextField(r, "Packed");
+            
+            r.xMin = r.xMax + GAP;
+            r.xMax = r.xMin + 85;
+            EditorGUI.TextField(r, "File System");
 
             r.xMin = r.xMax + GAP;
             r.xMax = r.xMin + 85;
@@ -258,7 +266,7 @@ namespace StarForce.Editor.AssetBundleTools
 
         private void Save()
         {
-            if (LoadAssetAtPath<AssetBundleRuleEditorData>(m_ConfigurationPath) == null)
+            if (LoadAssetAtPath<ResourceRuleEditorData>(m_ConfigurationPath) == null)
             {
                 AssetDatabase.CreateAsset(m_Configuration, m_ConfigurationPath);
             }
@@ -268,9 +276,9 @@ namespace StarForce.Editor.AssetBundleTools
             }
         }
 
-        #region Refresh AssetBundleCollection.xml
+        #region Refresh ResourceCollection.xml
 
-        public void RefreshAssetBundleCollection()
+        public void RefreshResourceCollection()
         {
             if (m_Configuration == null)
             {
@@ -278,44 +286,44 @@ namespace StarForce.Editor.AssetBundleTools
             }
             m_SourceAssetExceptTypeFilterGUIDArray = AssetDatabase.FindAssets(m_SourceAssetExceptTypeFilter);
             m_SourceAssetExceptLabelFilterGUIDArray = AssetDatabase.FindAssets(m_SourceAssetExceptLabelFilter);
-            AnalysisAssetBundleFilters();
+            AnalysisResourceFilters();
             if (SaveCollection())
             {
-                Debug.Log("Refresh AssetBundleCollection.xml success");
+                Debug.Log("Refresh ResourceCollection.xml success");
             }
             else
             {
-                Debug.Log("Refresh AssetBundleCollection.xml fail");
+                Debug.Log("Refresh ResourceCollection.xml fail");
             }
         }
 
-        private GFAssetBundle[] GetAssetBundles()
+        private GFResource[] GetResources()
         {
-            return m_AssetBundleCollection.GetAssetBundles();
+            return m_ResourceCollection.GetResources();
         }
 
-        private bool HasAssetBundle(string assetBundleName, string assetBundleVariant)
+        private bool HasResource(string name, string variant)
         {
-            return m_AssetBundleCollection.HasAssetBundle(assetBundleName, assetBundleVariant);
+            return m_ResourceCollection.HasResource(name, variant);
         }
 
-        private bool AddAssetBundle(string assetBundleName, string assetBundleVariant,
-            AssetBundleLoadType assetBundleLoadType, bool assetBundlePacked, string[] assetBundleResourceGroups)
+        private bool AddResource(string name, string variant,string fileSystem,
+            LoadType loadType, bool packed, string[] resourceGroups)
         {
-            return m_AssetBundleCollection.AddAssetBundle(assetBundleName, assetBundleVariant, assetBundleLoadType,
-                assetBundlePacked, assetBundleResourceGroups);
+            return m_ResourceCollection.AddResource(name, variant, fileSystem,loadType,
+                packed, resourceGroups);
         }
 
-        private bool RenameAssetBundle(string oldAssetBundleName, string oldAssetBundleVariant,
-            string newAssetBundleName, string newAssetBundleVariant)
+        private bool RenameResource(string oldName, string oldVariant,
+            string newName, string newVariant)
         {
-            return m_AssetBundleCollection.RenameAssetBundle(oldAssetBundleName, oldAssetBundleVariant,
-                newAssetBundleName, newAssetBundleVariant);
+            return m_ResourceCollection.RenameResource(oldName, oldVariant,
+                newName, newVariant);
         }
 
-        private bool AssignAsset(string assetGuid, string assetBundleName, string assetBundleVariant)
+        private bool AssignAsset(string assetGuid, string resourceName, string resourceVariant)
         {
-            if (m_AssetBundleCollection.AssignAsset(assetGuid, assetBundleName, assetBundleVariant))
+            if (m_ResourceCollection.AssignAsset(assetGuid, resourceName, resourceVariant))
             {
                 return true;
             }
@@ -323,44 +331,44 @@ namespace StarForce.Editor.AssetBundleTools
             return false;
         }
 
-        private void AnalysisAssetBundleFilters()
+        private void AnalysisResourceFilters()
         {
-            m_AssetBundleCollection = new AssetBundleCollection();
+            m_ResourceCollection = new ResourceCollection();
             List<string> signedAssetBundleList = new List<string>();
 
-            foreach (AssetBundleRule assetBundleRule in m_Configuration.rules)
+            foreach (ResourceRule resourceRule in m_Configuration.rules)
             {
-                if (assetBundleRule.assetBundleVariant == "")
-                    assetBundleRule.assetBundleVariant = null;
+                if (resourceRule.variant == "")
+                    resourceRule.variant = null;
 
-                if (assetBundleRule.valid)
+                if (resourceRule.valid)
                 {
-                    switch (assetBundleRule.filterType)
+                    switch (resourceRule.filterType)
                     {
-                        case AssetBundleFilterType.Root:
+                        case ResourceFilterType.Root:
                         {
-                            if (string.IsNullOrEmpty(assetBundleRule.assetBundleName))
+                            if (string.IsNullOrEmpty(resourceRule.name))
                             {
                                 string relativeDirectoryName =
-                                    assetBundleRule.assetsDirectoryPath.Replace("Assets/", "");
-                                ApplyAssetBundleFilter(ref signedAssetBundleList, assetBundleRule,
+                                    resourceRule.assetsDirectoryPath.Replace("Assets/", "");
+                                ApplyResourceFilter(ref signedAssetBundleList, resourceRule,
                                     Utility.Path.GetRegularPath(relativeDirectoryName));
                             }
                             else
                             {
-                                ApplyAssetBundleFilter(ref signedAssetBundleList, assetBundleRule,
-                                    assetBundleRule.assetBundleName);
+                                ApplyResourceFilter(ref signedAssetBundleList, resourceRule,
+                                    resourceRule.name);
                             }
                         }
                             break;
 
-                        case AssetBundleFilterType.Children:
+                        case ResourceFilterType.Children:
                         {
-                            string[] patterns = assetBundleRule.searchPatterns.Split(';', ',', '|');
+                            string[] patterns = resourceRule.searchPatterns.Split(';', ',', '|');
                             for (int i = 0; i < patterns.Length; i++)
                             {
                                 FileInfo[] assetFiles =
-                                    new DirectoryInfo(assetBundleRule.assetsDirectoryPath).GetFiles(patterns[i],
+                                    new DirectoryInfo(resourceRule.assetsDirectoryPath).GetFiles(patterns[i],
                                         SearchOption.AllDirectories);
                                 foreach (FileInfo file in assetFiles)
                                 {
@@ -377,7 +385,7 @@ namespace StarForce.Editor.AssetBundleTools
 
                                     if (!m_SourceAssetExceptTypeFilterGUIDArray.Contains(assetGUID) && !m_SourceAssetExceptLabelFilterGUIDArray.Contains(assetGUID))
                                     {
-                                        ApplyAssetBundleFilter(ref signedAssetBundleList, assetBundleRule,
+                                        ApplyResourceFilter(ref signedAssetBundleList, resourceRule,
                                             relativeAssetNameWithoutExtension, assetGUID);
                                     }
                                 }
@@ -385,29 +393,29 @@ namespace StarForce.Editor.AssetBundleTools
                         }
                             break;
 
-                        case AssetBundleFilterType.ChildrenFoldersOnly:
+                        case ResourceFilterType.ChildrenFoldersOnly:
                         {
                             DirectoryInfo[] assetDirectories =
-                                new DirectoryInfo(assetBundleRule.assetsDirectoryPath).GetDirectories();
+                                new DirectoryInfo(resourceRule.assetsDirectoryPath).GetDirectories();
                             foreach (DirectoryInfo directory in assetDirectories)
                             {
                                 string relativeDirectoryName =
                                     directory.FullName.Substring(Application.dataPath.Length + 1);
 
-                                ApplyAssetBundleFilter(ref signedAssetBundleList, assetBundleRule,
+                                ApplyResourceFilter(ref signedAssetBundleList, resourceRule,
                                     Utility.Path.GetRegularPath(relativeDirectoryName), string.Empty,
                                     directory.FullName);
                             }
                         }
                             break;
 
-                        case AssetBundleFilterType.ChildrenFilesOnly:
+                        case ResourceFilterType.ChildrenFilesOnly:
                         {
                             DirectoryInfo[] assetDirectories =
-                                new DirectoryInfo(assetBundleRule.assetsDirectoryPath).GetDirectories();
+                                new DirectoryInfo(resourceRule.assetsDirectoryPath).GetDirectories();
                             foreach (DirectoryInfo directory in assetDirectories)
                             {
-                                string[] patterns = assetBundleRule.searchPatterns.Split(';', ',', '|');
+                                string[] patterns = resourceRule.searchPatterns.Split(';', ',', '|');
                                 for (int i = 0; i < patterns.Length; i++)
                                 {
                                     FileInfo[] assetFiles =
@@ -429,7 +437,7 @@ namespace StarForce.Editor.AssetBundleTools
 
                                         if (!m_SourceAssetExceptTypeFilterGUIDArray.Contains(assetGUID) && !m_SourceAssetExceptLabelFilterGUIDArray.Contains(assetGUID))
                                         {
-                                            ApplyAssetBundleFilter(ref signedAssetBundleList, assetBundleRule,
+                                            ApplyResourceFilter(ref signedAssetBundleList, resourceRule,
                                                 relativeAssetNameWithoutExtension, assetGUID);
                                         }
                                     }
@@ -442,38 +450,38 @@ namespace StarForce.Editor.AssetBundleTools
             }
         }
 
-        private void ApplyAssetBundleFilter(ref List<string> signedAssetBundleList, AssetBundleRule assetBundleRule,
-            string assetBundleName, string singleAssetGUID = "", string childDirectoryPath = "")
+        private void ApplyResourceFilter(ref List<string> signedResourceList, ResourceRule resourceRule,
+            string resourceName, string singleAssetGUID = "", string childDirectoryPath = "")
         {
-            if (!signedAssetBundleList.Contains(Path.Combine(assetBundleRule.assetsDirectoryPath, assetBundleName)))
+            if (!signedResourceList.Contains(Path.Combine(resourceRule.assetsDirectoryPath, resourceName)))
             {
-                signedAssetBundleList.Add(Path.Combine(assetBundleRule.assetsDirectoryPath, assetBundleName));
+                signedResourceList.Add(Path.Combine(resourceRule.assetsDirectoryPath, resourceName));
 
-                foreach (GFAssetBundle oldAssetBundle in GetAssetBundles())
+                foreach (GFResource oldResource in GetResources())
                 {
-                    if (oldAssetBundle.Name == assetBundleName)
+                    if (oldResource.Name == resourceName)
                     {
-                        RenameAssetBundle(oldAssetBundle.Name, oldAssetBundle.Variant,
-                            assetBundleName, assetBundleRule.assetBundleVariant);
+                        RenameResource(oldResource.Name, oldResource.Variant,
+                            resourceName, resourceRule.variant);
                         break;
                     }
                 }
 
-                if (!HasAssetBundle(assetBundleName, assetBundleRule.assetBundleVariant))
+                if (!HasResource(resourceName, resourceRule.variant))
                 {
-                    AddAssetBundle(assetBundleName, assetBundleRule.assetBundleVariant,
-                        assetBundleRule.assetBundleLoadType, assetBundleRule.packed,
-                        assetBundleRule.assetBundleGroups.Split(';', ',', '|'));
+                    AddResource(resourceName, resourceRule.variant,resourceRule.fileSystem,
+                        resourceRule.loadType, resourceRule.packed,
+                        resourceRule.groups.Split(';', ',', '|'));
                 }
 
-                switch (assetBundleRule.filterType)
+                switch (resourceRule.filterType)
                 {
-                    case AssetBundleFilterType.Root:
-                    case AssetBundleFilterType.ChildrenFoldersOnly:
-                        string[] patterns = assetBundleRule.searchPatterns.Split(';', ',', '|');
+                    case ResourceFilterType.Root:
+                    case ResourceFilterType.ChildrenFoldersOnly:
+                        string[] patterns = resourceRule.searchPatterns.Split(';', ',', '|');
                         if (childDirectoryPath == "")
                         {
-                            childDirectoryPath = assetBundleRule.assetsDirectoryPath;
+                            childDirectoryPath = resourceRule.assetsDirectoryPath;
                         }
 
                         for (int i = 0; i < patterns.Length; i++)
@@ -493,19 +501,19 @@ namespace StarForce.Editor.AssetBundleTools
 
                                 if (!m_SourceAssetExceptTypeFilterGUIDArray.Contains(assetGUID) && !m_SourceAssetExceptLabelFilterGUIDArray.Contains(assetGUID))
                                 {
-                                    AssignAsset(assetGUID, assetBundleName,
-                                        assetBundleRule.assetBundleVariant);
+                                    AssignAsset(assetGUID, resourceName,
+                                        resourceRule.variant);
                                 }
                             }
                         }
 
                         break;
 
-                    case AssetBundleFilterType.Children:
-                    case AssetBundleFilterType.ChildrenFilesOnly:
+                    case ResourceFilterType.Children:
+                    case ResourceFilterType.ChildrenFilesOnly:
                     {
-                        AssignAsset(singleAssetGUID, assetBundleName,
-                                assetBundleRule.assetBundleVariant);
+                        AssignAsset(singleAssetGUID, resourceName,
+                                resourceRule.variant);
                     }
                         break;
                 }
@@ -514,7 +522,7 @@ namespace StarForce.Editor.AssetBundleTools
 
         private bool SaveCollection()
         {
-            return m_AssetBundleCollection.Save();
+            return m_ResourceCollection.Save();
         }
 
         #endregion
