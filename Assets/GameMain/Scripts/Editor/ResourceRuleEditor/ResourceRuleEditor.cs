@@ -164,8 +164,12 @@ namespace StarForce.Editor.ResourceTools
 
             r.xMin = r.xMax + GAP;
             r.xMax = r.xMin + 85;
-            rule.variant = EditorGUI.TextField(r, rule.variant.ToLower());
-
+            rule.variant = EditorGUI.TextField(r, rule.variant);
+            if (!string.IsNullOrEmpty(rule.variant))
+            {
+                rule.variant = rule.variant.ToLower();
+            }
+            
             r.xMin = r.xMax + GAP;
             r.width = assetBundleNameLength - 15;
             GUI.enabled = false;
