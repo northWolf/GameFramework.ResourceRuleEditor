@@ -473,6 +473,12 @@ namespace StarForce.Editor.ResourceTools
 
                 if (!HasResource(resourceName, resourceRule.variant))
                 {
+
+                    if (string.IsNullOrEmpty(resourceRule.fileSystem))
+                    {
+                        resourceRule.fileSystem = null;
+                    }
+
                     AddResource(resourceName, resourceRule.variant,resourceRule.fileSystem,
                         resourceRule.loadType, resourceRule.packed,
                         resourceRule.groups.Split(';', ',', '|'));
