@@ -463,7 +463,7 @@ namespace StarForce.Editor.ResourceTools
 
                 foreach (GFResource oldResource in GetResources())
                 {
-                    if (oldResource.Name == resourceName)
+                    if (oldResource.Name == resourceName && string.IsNullOrEmpty(oldResource.Variant))
                     {
                         RenameResource(oldResource.Name, oldResource.Variant,
                             resourceName, resourceRule.variant);
